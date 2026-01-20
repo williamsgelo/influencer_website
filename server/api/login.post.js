@@ -8,18 +8,14 @@ const prisma = new PrismaClient();
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event);
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(body.password, salt);
 
-    // validate email
     if (!validator.isEmail(body.email)) {
       throw createError({
         statusCode: 400,
-        message: "Invalid email address",
+        message: "Invalid email, please change.",
       });
     }
 
-    // validate password strength
     if (
       !validator.isStrongPassword(body.password, {
         minLength: 8,
@@ -35,32 +31,45 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // sends to database for reference
-    const user = await prisma.user.create({
-      data: {
+    const user = await prisma.user.findUnique({
+      where: {
         email: body.email,
-        password: passwordHash,
-        salt: salt,
       },
     });
 
-    //json web token
+    const isValid = await bcrypt.compare(body.password, user.password);
+
+    console.log("IS VALID:");
+    console.log(isValid);
+
+    if (!isValid) {
+      throw createError({
+        statusCode: 400,
+        message: "Username or password is invalid.",
+      });
+    }
+
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
 
     setCookie(event, "InfluencerAppJWT", token);
 
-    // console.log("Generated JWT Token:", token);
-
-    return { data: "success" };
+    return { data: "success!" };
   } catch (error) {
     console.log(error.code);
 
     if (error.code === "P2002") {
       throw createError({
         statusCode: 409,
-        message: "Email address already exist!",
+        message: "An email with this address already exists.",
       });
     }
+
     throw error;
   }
 });
+
+// GET
+// POST
+// PATCH
+// PUT
+// DELETE

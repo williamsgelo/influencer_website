@@ -53,8 +53,8 @@
                     item.status === 'complete'
                       ? 'bg-green-500'
                       : item.status === 'warning'
-                      ? 'bg-yellow-500'
-                      : 'bg-gray-300'
+                        ? 'bg-yellow-500'
+                        : 'bg-gray-300'
                   "
                 >
                   <CheckIcon
@@ -275,6 +275,10 @@
 </template>
 
 <script setup>
+definePageMeta({
+  middleware: ["auth"],
+});
+
 import { ref, computed } from "vue";
 import {
   CheckIcon,
@@ -325,7 +329,7 @@ const publicProfileUrl = ref("https://platform.co.za/influencer/johndoe");
 
 const completionPercentage = computed(() => {
   const completed = checklistItems.value.filter(
-    (item) => item.status === "complete"
+    (item) => item.status === "complete",
   ).length;
   return Math.round((completed / checklistItems.value.length) * 100);
 });

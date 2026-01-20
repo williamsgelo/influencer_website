@@ -12,12 +12,13 @@
         for one.
       </p>
 
-      <form>
+      <form @submit.prevent="submit">
         <div class="mt-8">
           <label for="" class="text-zinc-300 text-sm block mb-0.5"
             >Email Address</label
           >
           <input
+            v-model="email"
             placeholder="you@example.com"
             type="email"
             class="block w-full bg-[#27272A] border border-[#3F3F46] rounded text-white px-4 py-2 placeholder:text-zinc-500 text-sm"
@@ -29,6 +30,7 @@
             >Password</label
           >
           <input
+            v-model="password"
             placeholder="****************"
             type="password"
             class="block w-full bg-[#27272A] border border-[#3F3F46] rounded text-white px-4 py-2 placeholder:text-zinc-500 text-sm"
@@ -53,3 +55,43 @@
     <!-- /note introduction -->
   </div>
 </template>
+
+<script setup>
+import Swal from "sweetalert2";
+
+const email = ref("");
+const password = ref("");
+
+async function submit() {
+  try {
+    const response = await $fetch("/api/login", {
+      method: "POST",
+      body: {
+        email: email.value,
+        password: password.value,
+      },
+    });
+
+    const { isConfirmed } = await Swal.fire({
+      title: "Success!",
+      text: "Logged in successfully.",
+      icon: "success",
+      confirmButtonText: "Close",
+    });
+
+    if (isConfirmed) {
+      navigateTo("/dashboard");
+    }
+  } catch (error) {
+    console.log("ERROR:");
+    console.log(error);
+    console.log(error.response?._data?.message);
+    Swal.fire({
+      title: "Error!",
+      text: error.response?._data?.message,
+      icon: "error",
+      confirmButtonText: "Close",
+    });
+  }
+}
+</script>

@@ -81,9 +81,9 @@ async function submit() {
       confirmButtonText: "Close",
     });
 
-    // if (isConfirmed) {
-    //   navigateTo("/");
-    // }
+    if (isConfirmed) {
+      navigateTo("/dashboard");
+    }
   } catch (error) {
     console.log("ERROR:");
     console.log(error.response?._data?.message);
